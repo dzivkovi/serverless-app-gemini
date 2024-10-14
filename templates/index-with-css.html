@@ -57,20 +57,26 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             min-height: 150px; /* Ensure a minimum height for the response area */
         }
+        .safety-info {
+            margin-top: 20px;
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
     <h1>Gemini Text Generation with built-in Content Moderation</h1>
     <form method="post">
         <label for="prompt">Enter Prompt:</label>
-        <textarea id="prompt" name="prompt" rows="5" cols="50"></textarea>
+        <textarea id="prompt" name="prompt" rows="5" cols="50">{{ last_prompt }}</textarea>
 
         <label for="moderation_level">Moderation Level:</label>
         <select id="moderation_level" name="moderation_level">
-            <option value="strict">Strict</option>
-            <option value="moderate" selected>Moderate</option>
-            <option value="relaxed">Relaxed</option>
-            <option value="minimal">Minimal</option>
+            <option value="strict" {% if last_moderation_level == 'strict' %}selected{% endif %}>Strict</option>
+            <option value="moderate" {% if last_moderation_level == 'moderate' %}selected{% endif %}>Moderate</option>
+            <option value="relaxed" {% if last_moderation_level == 'relaxed' %}selected{% endif %}>Relaxed</option>
+            <option value="minimal" {% if last_moderation_level == 'minimal' %}selected{% endif %}>Minimal</option>
         </select>
 
         <input type="submit" value="Generate">
@@ -80,5 +86,16 @@
         <h2>Response:</h2>
         {{ response_text | safe }}
     </div>
+
+    {% if safety_info %}
+    <div class="safety-info">
+        <h3>Safety Information:</h3>
+        <ul>
+        {% for info in safety_info %}
+            <li>{{ info }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 </body>
 </html>
