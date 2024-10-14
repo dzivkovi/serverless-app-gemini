@@ -64,16 +64,13 @@ To test the app locally:
 2. Run the Flask app:
 
    ```sh
-   python gemini-app.py
+   python gemini_app.py
    ```
 
 3. Test using curl:
 
    ```sh
    curl -X POST -H "Accept: application/json" -d "prompt=Tell me a short love scene, without being too graphic&moderation_level=strict" http://localhost:8080
-
-   curl "http://localhost:8080/?prompt=Sexy%20story,%20please&moderation_level=relaxed&format=json"
-
    ```
 
 ### Deployment
