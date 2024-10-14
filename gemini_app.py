@@ -11,8 +11,6 @@ from vertexai.generative_models import GenerativeModel  # type: ignore
 from vertexai.preview.generative_models import HarmBlockThreshold  # type: ignore
 import vertexai.preview.generative_models as generative_models  # type: ignore
 from vertexai.preview.generative_models import GenerationConfig
-
-
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -116,7 +114,7 @@ def generate_content(prompt, content_filter_strength="moderate"):
                 category = getattr(rating, 'category', 'Unknown')
                 probability = getattr(rating, 'probability', 'Unknown')
                 level = safety_levels.get(probability, "Unknown")
-                logging.info(f"  {category}: {level} ({probability})")
+                logging.info("  %s: %s (%s)", category, level, probability)
                 safety_info.append(f"{category}: {level}")
 
             if finish_reason == "SAFETY":
