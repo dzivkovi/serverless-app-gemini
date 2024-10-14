@@ -1,17 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini Text Generation</title>
 </head>
 <body>
-    <h1>Cloud Run sample: Gemini Text Generation with built-in Content Moderation.</h1>
+    <h1>Cloud Run sample: Gemini Text Generation with built-in Content Moderation</h1>
     <form method="post">
         <label for="prompt">Enter Prompt:</label><br>
         <textarea id="prompt" name="prompt" rows="5" cols="50"></textarea><br><br>
+        <label for="moderation_level">Moderation Level:</label>
+        <select id="moderation_level" name="moderation_level">
+            <option value="strict">Strict</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="relaxed">Relaxed</option>
+            <option value="minimal">Minimal</option>
+        </select><br><br>
         <input type="submit" value="Generate">
     </form>
 
     <h2>Response:</h2>
-    <div id="response">{{ response_text }}</div>
+    <div id="response">{{ response_text | safe }}</div>
 </body>
 </html>

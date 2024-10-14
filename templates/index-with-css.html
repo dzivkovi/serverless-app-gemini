@@ -7,6 +7,7 @@
             font-family: sans-serif;
             background-color: #f4f4f4;
             padding: 20px;
+            background-color: #f0f0f0;
         }
 
         h1 {
@@ -26,7 +27,7 @@
             margin-bottom: 5px;
         }
 
-        textarea {
+        textarea, select {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -43,7 +44,9 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
         #response {
             background-color: white;
             padding: 20px;
@@ -57,13 +60,22 @@
 <body>
     <h1>Gemini Text Generation with built-in Content Moderation</h1>
     <form method="post">
-        <label for="prompt">Enter Prompt:</label><br>
-        <textarea id="prompt" name="prompt" rows="5" cols="50"></textarea><br><br>
+        <label for="prompt">Enter Prompt:</label>
+        <textarea id="prompt" name="prompt" rows="5" cols="50"></textarea>
+
+        <label for="moderation_level">Moderation Level:</label>
+        <select id="moderation_level" name="moderation_level">
+            <option value="strict">Strict</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="relaxed">Relaxed</option>
+            <option value="minimal">Minimal</option>
+        </select>
+
         <input type="submit" value="Generate">
     </form>
 
-    <h2>Response:</h2>
     <div id="response">
+        <h2>Response:</h2>
         {{ response_text | safe }}
     </div>
 </body>
