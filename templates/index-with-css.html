@@ -17,6 +17,20 @@
             text-align: center;
         }
 
+        h2 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        form h2:first-child {
+            margin-top: 0;
+        }
+
+        textarea {
+            margin-top: 5px;
+        }
+
         form {
             background-color: white;
             padding: 20px;
@@ -46,9 +60,11 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
         input[type="submit"]:hover {
             background-color: #45a049;
         }
+
         #response {
             background-color: white;
             padding: 20px;
@@ -57,19 +73,59 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             min-height: 150px; /* Ensure a minimum height for the response area */
         }
+
         .safety-info {
             margin-top: 20px;
             background-color: #f8f8f8;
             padding: 10px;
             border-radius: 4px;
         }
+
+        .moderated {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .textarea-wrapper {
+            padding: 0 20px; /* Adds 20px padding on left and right */
+        }
+
+        textarea {
+            width: 100%; /* Makes the textarea take up the full width of its container */
+            box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+            padding: 10px; /* Adds some internal padding for text */
+            margin-top: 5px;
+            margin-bottom: 15px; /* Adds some space below the textarea */
+        }
+
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Adjust other form elements to align with the new padding */
+        form h2, form label, form select, form input[type="submit"] {
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+
+        form select {
+            width: calc(100% - 40px); /* Full width minus left and right padding */
+        }
+
     </style>
 </head>
 <body>
     <h1>Gemini Text Generation with built-in Content Moderation</h1>
     <form method="post">
-        <label for="prompt">Enter Prompt:</label>
-        <textarea id="prompt" name="prompt" rows="5" cols="50">{{ last_prompt }}</textarea>
+        <label for="prompt">
+            <h2>Enter Prompt:</h2>
+        </label>
+        <div class="textarea-wrapper">
+            <textarea id="prompt" name="prompt" rows="5">{{ last_prompt }}</textarea>
+        </div>
 
         <label for="moderation_level">Moderation Level:</label>
         <select id="moderation_level" name="moderation_level">
@@ -84,7 +140,11 @@
 
     <div id="response">
         <h2>Response:</h2>
-        {{ response_text | safe }}
+        {% if "Content moderated" in response_text %}
+            <p class="moderated">{{ response_text }}</p>
+        {% else %}
+            {{ response_text | safe }}
+        {% endif %}
     </div>
 
     {% if safety_info %}

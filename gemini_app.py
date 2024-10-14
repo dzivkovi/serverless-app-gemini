@@ -128,8 +128,8 @@ def generate_content(prompt, content_filter_strength="moderate"):
                 logging.debug("Received from Gemini: %s", generated_text)
                 return generated_text, False, None, safety_info
             else:
-                logging.warning("No content generated.")
-                return None, False, "No content generated", safety_info
+                logging.warning("No content generated due to safety filters.")
+                return None, True, "No content generated due to safety filters", safety_info
         else:
             logging.warning("No candidates in the response.")
             return None, False, "No candidates in the response", []
@@ -158,21 +158,17 @@ def index():
                 generate_content(prompt, content_filter_strength=moderation_level)
             )
 
-            if is_moderated:
+            if is_moderated or not response_text:
+                response_message = f"Content moderated: {moderation_reason}"
                 if request.headers.get('Accept') == 'application/json':
-                    return (
-                        jsonify(
-                            {
-                                "error": "Content moderated",
-                                "reason": moderation_reason,
-                                "safety_info": safety_info,
-                            }
-                        ),
-                        403,
-                    )
+                    return jsonify({
+                        "error": "Content moderated",
+                        "reason": moderation_reason,
+                        "safety_info": safety_info
+                    }), 403
                 else:
                     return render_template("index-with-css.html",
-                                           response_text=f"Content moderated: {moderation_reason}",
+                                           response_text=response_message,
                                            safety_info=safety_info,
                                            last_prompt=prompt,
                                            last_moderation_level=moderation_level)
@@ -184,16 +180,6 @@ def index():
                     response_text = markdown.markdown(response_text)
                     return render_template("index-with-css.html",
                                            response_text=response_text,
-                                           safety_info=safety_info,
-                                           last_prompt=prompt,
-                                           last_moderation_level=moderation_level)
-            else:
-                error_message = "No content generated"
-                if request.headers.get('Accept') == 'application/json':
-                    return jsonify({"error": error_message, "safety_info": safety_info}), 404
-                else:
-                    return render_template("index-with-css.html",
-                                           response_text=f"Error: {error_message}",
                                            safety_info=safety_info,
                                            last_prompt=prompt,
                                            last_moderation_level=moderation_level)
