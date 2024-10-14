@@ -24,7 +24,7 @@ logging.basicConfig(level=LOG_LEVEL)
 required_vars = ['PROJECT_ID', 'REGION', 'MODEL_NAME', 'MODERATION_LEVEL']
 for var in required_vars:
     if not os.getenv(var):
-        logging.error("environment variable '%s' is not set", var)
+        logging.error("Environment variable '%s' is not set", var)
         sys.exit(1)
 
 PROJECT_ID = os.getenv('PROJECT_ID')
@@ -34,9 +34,13 @@ MODERATION_LEVEL = os.getenv('MODERATION_LEVEL', 'moderate')
 
 app = Flask(__name__)
 
-vertexai.init(project=PROJECT_ID, location=REGION)
-
-model = GenerativeModel(MODEL_NAME)
+try:
+    vertexai.init(project=PROJECT_ID, location=REGION)
+    model = GenerativeModel(MODEL_NAME)
+    logging.info("Vertexai initialized successfully")
+except Exception as e:
+    logging.error("Failed to initialize Vertexai: %s", e)
+    sys.exit(1)
 
 generation_config = {
     "max_output_tokens": 8192,
@@ -72,18 +76,23 @@ def generate_content(prompt, content_filter_strength="moderate"):
     Generate content using the provided prompt.
 
     Args:
-        prompt (_type_): _description_
-        content_filter_strength (str, optional): _description_. Defaults to "moderate".
+        prompt (str): The input prompt for content generation.
+        content_filter_strength (str, optional): Moderation level. Defaults to "moderate".
 
     Returns:
-        _type_: _description_
+        str: The generated content.
+
+    Raises:
+        ContentGenerationError: If there's an error during content generation.
     """
+    logging.debug("Prompt for Gemini: %s", prompt)
     safety_settings = get_safety_settings(content_filter_strength)
     response = model.generate_content(
         prompt,
         generation_config=generation_config,
         safety_settings=safety_settings
     )
+    logging.debug("Gemini response: %s", response.text)
     return response.text
 
 
@@ -96,13 +105,23 @@ def index():
     if request.method == "POST":
         prompt = request.form.get("prompt")
         moderation_level = request.form.get("moderation_level", MODERATION_LEVEL)
-        response_text = generate_content(prompt, content_filter_strength=moderation_level)
 
-        if request.headers.get('Accept') == 'application/json':
-            return jsonify({"response": response_text})
-        else:
-            response_text = markdown.markdown(response_text)
-            return render_template("index-with-css.html", response_text=response_text)
+        try:
+            response_text = generate_content(prompt, content_filter_strength=moderation_level)
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({"response": response_text})
+            else:
+                response_text = markdown.markdown(response_text)
+                return render_template("index-with-css.html", response_text=response_text)
+        except Exception as e:
+            error_message = str(e)
+            logging.error("Gemini AI error: %s", error_message)
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({"error": error_message}), 400
+            else:
+                return render_template(
+                    "index-with-css.html", response_text=f"Error: {error_message}"
+                )
     else:  # GET request
         return render_template("index-with-css.html", response_text="")
 
